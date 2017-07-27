@@ -7,7 +7,7 @@ var helmet = require('helmet');
 var Web3 = require('web3');
 var BigNumber = require('bignumber.js');
 
-var web3 = new Web3(new Web3.providers.HttpProvider('http://127.0.0.1:8588'));
+var web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:8588'));
 var port = 8888;
 
 var logger = function(req, res, next) {
@@ -100,10 +100,12 @@ var handleRequest = function(req, res) {
           });
           break;
         case 'eth_getBalance':
+          var balance = web3.toHex(web3.eth.getBalance(req.body.params[0], 'pending'));
+          console.log('Balance: ', balance);
           res.json({
             jsonrpc: '2.0',
 					  address: formatAddress(req.body.params[0]),
-					  result: new BigNumber(web3.eth.getBalance(req.body.params[0], 'pending')),
+					  result: balance,
             id: req.body.id
           });
           break;
@@ -111,6 +113,13 @@ var handleRequest = function(req, res) {
           res.json({
             jsonrpc: '2.0',
 					  result: web3.eth.call(req.body.params[0]),
+            id: req.body.id
+          });
+          break;
+        case 'eth_sendTransaction':
+          res.json({
+            jsonrpc: '2.0',
+            result: web3.eth.sendTransaction(req.body.params[0]),
             id: req.body.id
           });
           break;
