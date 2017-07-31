@@ -5,7 +5,6 @@ var bodyParser = require('body-parser');
 var helmet = require('helmet');
 
 var Web3 = require('web3');
-var BigNumber = require('bignumber.js');
 
 var web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:8588'));
 var port = 8888;
@@ -16,14 +15,15 @@ var logger = function(req, res, next) {
 }
 
 var formatAddress = function(addr) {
-	if (addr.substring(0, 2) == "0x") return addr;
-	return "0x" + addr;
+  if (addr.substring(0, 2) == "0x") return addr;
+  return "0x" + addr;
+  be
 }
 
 var handleRequest = function(req, res) {
   if (req.method === 'OPTIONS') {
     res.header('Access-Control-Allow-Origin', '*');
-  	res.header('Content-Type', 'application/json');
+    res.header('Content-Type', 'application/json');
     res.header('Access-Control-Allow-Credentials', 'true');
     res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.header('Access-Control-Allow-Headers', 'DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type');
@@ -31,22 +31,22 @@ var handleRequest = function(req, res) {
     res.header('Content-Type', 'text/plain charset=UTF-8');
     res.header('Content-Length', 0);
     res.status(200).send();
-  } else if (req.method === 'POST'){
+  } else if (req.method === 'POST') {
     if (!req.body) {
       res.status(400).send();
-    } else if (Array.isArray(req.body)){
+    } else if (Array.isArray(req.body)) {
       //txdata
       res.json([{
         // balance
         jsonrpc: '2.0',
         result: web3.toHex(web3.eth.getBalance(req.body[0].params[0], 'pending')),
         id: req.body[0].id
-      },{
+      }, {
         // gas price
         jsonrpc: '2.0',
         result: web3.toHex(web3.eth.gasPrice),
         id: req.body[1].id
-      },{
+      }, {
         // nonce
         jsonrpc: '2.0',
         result: web3.toHex(web3.eth.getTransactionCount(req.body[0].params[0], 'pending')),
@@ -59,14 +59,14 @@ var handleRequest = function(req, res) {
         case 'eth_getBlockByNumber':
           if (req.body.params[0] == 'latest' || req.body.params[0] == 'pending' || req.body.params[0] == 'earliest') {
             res.json({
-  					  jsonrpc: '2.0',
-  					  result: web3.eth.getBlock(req.body.params[0], req.body.params[1]),
+              jsonrpc: '2.0',
+              result: web3.eth.getBlock(req.body.params[0], req.body.params[1]),
               id: req.body.id
             });
           } else {
             res.json({
-  					  jsonrpc: '2.0',
-  					  result: web3.eth.getBlock(web3.toDecimal(req.body.params[0]), req.body.params[1]),
+              jsonrpc: '2.0',
+              result: web3.eth.getBlock(web3.toDecimal(req.body.params[0]), req.body.params[1]),
               id: req.body.id
             });
           }
@@ -75,6 +75,13 @@ var handleRequest = function(req, res) {
           res.json({
             jsonrpc: '2.0',
             result: web3.eth.getCode(req.body.params[0], req.body.params[1]),
+            id: req.body.id
+          });
+          break;
+        case 'eth_getTransactionByHash':
+          res.json({
+            jsonrpc: '2.0',
+            result: web3.eth.getTransactionByHash(req.body.params[0]),
             id: req.body.id
           });
           break;
@@ -94,25 +101,23 @@ var handleRequest = function(req, res) {
           break;
         case 'eth_blockNumber':
           res.json({
-					  jsonrpc: '2.0',
-					  result: web3.toHex(web3.eth.blockNumber),
+            jsonrpc: '2.0',
+            result: web3.toHex(web3.eth.blockNumber),
             id: req.body.id
           });
           break;
         case 'eth_getBalance':
-          var balance = web3.toHex(web3.eth.getBalance(req.body.params[0], 'pending'));
-          console.log('Balance: ', balance);
           res.json({
             jsonrpc: '2.0',
-					  address: formatAddress(req.body.params[0]),
-					  result: balance,
+            address: formatAddress(req.body.params[0]),
+            result: web3.toHex(web3.eth.getBalance(req.body.params[0], 'pending')),
             id: req.body.id
           });
           break;
         case 'eth_call':
           res.json({
             jsonrpc: '2.0',
-					  result: web3.eth.call(req.body.params[0]),
+            result: web3.eth.call(req.body.params[0]),
             id: req.body.id
           });
           break;
@@ -126,21 +131,21 @@ var handleRequest = function(req, res) {
         case 'eth_sendRawTransaction':
           res.json({
             jsonrpc: '2.0',
-					  result: web3.eth.sendRawTransaction(req.body.params[0]),
+            result: web3.eth.sendRawTransaction(req.body.params[0]),
             id: req.body.id
           });
           break;
         case 'eth_estimateGas':
           res.json({
             jsonrpc: '2.0',
-					  result: web3.eth.estimateGas(req.body.params[0]),
+            result: web3.eth.estimateGas(req.body.params[0]),
             id: req.body.id
           });
           break;
         case 'eth_gasPrice':
           res.json({
             jsonrpc: '2.0',
-					  result: web3.toHex(web3.eth.gasPrice),
+            result: web3.toHex(web3.eth.gasPrice),
             id: req.body.id
           });
           break;
@@ -159,7 +164,7 @@ var handleRequest = function(req, res) {
 }
 
 app.use(bodyParser.urlencoded({
-	extended: true
+  extended: true
 }));
 app.use(bodyParser.json());
 app.use(helmet());
@@ -170,6 +175,6 @@ app.all('/', function(req, res) {
   handleRequest(req, res);
 });
 
-app.listen(port, function(){
+app.listen(port, function() {
   console.log('listening on port %s', port);
 });
