@@ -55,7 +55,10 @@ var handleMethod = function(res, method, params) {
       break;
     case 'eth_getTransactionByHash':
       return {result: Response.getTransactionByHash()};
-      break;  
+      break;
+    case 'eth_getBlockByNumber':
+      return {result: Response.getBlockByNumber({quantity: params[0], fullTransaction: params[1]})};
+      break;    
     case 'eth_estimateGas':
       return {result: Response.getEstimatedGas(params[0])};
       break;
